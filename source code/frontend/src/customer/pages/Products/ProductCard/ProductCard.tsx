@@ -16,10 +16,8 @@ import ModeCommentIcon from "@mui/icons-material/ModeComment";
 import ChatBot from "../../ChatBot/ChatBot";
 
 interface ProductCardProps {
-  // images: string[];
-  // categoryId: string | undefined;
   item: Product;
-  categoryId: string
+  categoryId?: string;
 }
 const style = {
   position: "absolute",
@@ -39,7 +37,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, categoryId }) => {
   const dispatch = useAppDispatch();
   const [showChatBot, setShowChatBot] = useState(false);
 
-  const handleAddWishlist = (event: MouseEvent) => {
+  const handleAddWishlist = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     if (item._id) dispatch(addProductToWishlist({ productId: item._id }));
   };
@@ -56,12 +54,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, categoryId }) => {
     return () => clearInterval(interval);
   }, [isHovered, item.images.length]);
 
-  const handleShowChatBot = (event: MouseEvent) => {
+  const handleShowChatBot = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     setShowChatBot(true);
   };
-  const handleCloseChatBot = (e: MouseEvent) => {
-    e.stopPropagation();
+  const handleCloseChatBot = (event: React.SyntheticEvent) => {
+    event.stopPropagation();
     setShowChatBot(false);
   };
 
@@ -70,7 +68,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, categoryId }) => {
       <div
         onClick={() =>
           navigate(
-            `/product-details/${categoryId}/${item.title}/${item._id}`
+            `/product-details/${categoryId ?? item.category?.categoryId ?? 'unknown'}/${item.title}/${item._id}`
           )
         }
         className="group px-4 relative"

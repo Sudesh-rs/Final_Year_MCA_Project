@@ -11,9 +11,9 @@ const AdminLoginForm = () => {
 
     const navigate = useNavigate();
     const [otp, setOtp] = useState("");
-    const [isOtpSent, setIsOtpSent] = useState(false)
     const [timer, setTimer] = useState<number>(30); // Timer state
     const [isTimerActive, setIsTimerActive] = useState<boolean>(false);
+    const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
     const dispatch = useAppDispatch();
     const { auth } = useAppSelector(store => store)
 
@@ -38,14 +38,13 @@ const AdminLoginForm = () => {
 
     const handleResendOTP = () => {
         // Implement OTP resend logic
-        dispatch(sendLoginSignupOtp({ email: "signing_"+formik.values.email }))
+        dispatch(sendLoginSignupOtp({ email: "signing_" + formik.values.email }))
         console.log('Resend OTP');
         setTimer(30);
         setIsTimerActive(true);
     };
 
     const handleSentOtp = () => {
-        setIsOtpSent(true);
         handleResendOTP();
     }
 
@@ -53,9 +52,10 @@ const AdminLoginForm = () => {
         formik.handleSubmit()
     }
 
-  
-
     useEffect(() => {
+        if (auth.error) {
+            setShowErrorSnackbar(true);
+        }
         let interval: NodeJS.Timeout | undefined;
 
         if (isTimerActive) {
@@ -74,9 +74,11 @@ const AdminLoginForm = () => {
         return () => {
             if (interval) clearInterval(interval);
         };
-    }, [isTimerActive]);
+    }, [isTimerActive, auth.error]);
 
-
+    const handleCloseSnackbar = () => {
+        setShowErrorSnackbar(false);
+    };
 
     return (
         <div>
@@ -140,6 +142,16 @@ const AdminLoginForm = () => {
 
             </form>
 
+            <Snackbar
+                open={showErrorSnackbar && Boolean(auth.error)}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+                    {auth.error || 'Invalid email address'}
+                </Alert>
+            </Snackbar>
          
         </div>
     )

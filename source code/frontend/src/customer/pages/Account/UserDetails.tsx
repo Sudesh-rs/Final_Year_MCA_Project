@@ -39,8 +39,12 @@ const UserDetails = () => {
             <ProfileFildCard keys={"Name"} value={user.user?.fullName} />
             <Divider />
             <ProfileFildCard keys={"Email"} value={user.user?.email} />
-            <Divider />
-            <ProfileFildCard keys={"Mobile"} value={user.user?.mobile} />
+            {user.user?.mobile && (
+              <>
+                <Divider />
+                <ProfileFildCard keys={"Contact Number"} value={user.user.mobile} />
+              </>
+            )}
           </div>
         </div>
       </div>

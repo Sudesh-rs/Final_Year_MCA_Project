@@ -20,12 +20,13 @@ const SignupForm = () => {
         initialValues: {
             email: '',
             otp: '',
-            name: ""
+            name: "",
+            mobile: ""
         },
 
         onSubmit: (values: any) => {
             // Handle form submission
-            dispatch(signup({ fullName: values.name, email: values.email, otp, navigate }))
+            dispatch(signup({ fullName: values.name, email: values.email, mobile: values.mobile, otp, navigate }))
             console.log('Form data:', values);
         }
     });
@@ -127,6 +128,17 @@ const SignupForm = () => {
                     onBlur={formik.handleBlur}
                     error={formik.touched.name && Boolean(formik.errors.name)}
                     helperText={formik.touched.name ? formik.errors.name as string : undefined}
+                />}
+
+                {auth.otpSent && <TextField
+                    fullWidth
+                    name="mobile"
+                    label="Contact Number"
+                    value={formik.values.mobile}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.mobile && Boolean(formik.errors.mobile)}
+                    helperText={formik.touched.mobile ? formik.errors.mobile as string : undefined}
                 />}
 
                 {auth.otpSent && <div>

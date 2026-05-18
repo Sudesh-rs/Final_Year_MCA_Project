@@ -4,29 +4,35 @@ const bcrypt = require('bcrypt');
 
 class DataInitializationService {
   async initializeAdminUser() {
-    const adminEmail = 'codewithzosh@gmail.com';
-    const adminPassword = 'codewithzosh';
-    
+    const adminEmail = 'sudeshsawant9210@gmail.com';
+    const adminPassword = 'Sudesh@9210';
+    const adminName = 'Sudesh';
+
     try {
-      // Check if an admin user already exists
-      const adminExists = await User.findOne({ email: adminEmail });
+      // Hash the admin password
+      const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
-      if (!adminExists) {
-        // Hash the admin password
-        const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      // Atomically create or update the admin user by email
+      const update = {
+        fullName: adminName,
+        email: adminEmail,
+        password: hashedPassword,
+        role: 'ROLE_ADMIN',
+      };
 
-        // Create the admin user
-        const adminUser = new User({
-          fullName: 'Zosh',
-          email: adminEmail,
-          password: hashedPassword,
-          role: 'ROLE_ADMIN',
+      const options = { upsert: true, new: true, setDefaultsOnInsert: true };
+
+      const adminUser = await User.findOneAndUpdate({ email: adminEmail }, update, options);
+
+      if (adminUser) {
+        console.log('Admin user created/updated successfully:', {
+          email: adminUser.email,
+          fullName: adminUser.fullName,
+          role: adminUser.role,
+          updatedAt: adminUser.updatedAt,
         });
-
-        await adminUser.save();
-        console.log('Admin user created successfully!');
       } else {
-        console.log('Admin user already exists.');
+        console.log('Failed to create or update admin user');
       }
     } catch (error) {
       console.error('Error during admin initialization:', error);

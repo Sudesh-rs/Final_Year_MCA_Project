@@ -1,6 +1,11 @@
 // Import necessary modules
+require('dotenv').config();
 const Razorpay = require('razorpay');
-const stripe = require('stripe')(process.env.STRIPE_API_KEY);
+const stripeApiKey = process.env.STRIPE_API_KEY;
+if (!stripeApiKey) {
+    throw new Error('Missing STRIPE_API_KEY in backend/.env or environment variables');
+}
+const stripe = require('stripe')(stripeApiKey);
 const PaymentOrder = require('../models/PaymentOrder'); // Assuming you have Mongoose models defined
 const Order = require('../models/Order');
 const User = require('../models/User');

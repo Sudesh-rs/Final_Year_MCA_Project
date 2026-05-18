@@ -66,7 +66,7 @@ export const signin = createAsyncThunk<AuthResponse, LoginRequest>(
             return response.data;
         } catch (error:any) {
             console.log("error ", error.response)
-            return rejectWithValue('Signin failed');
+            return rejectWithValue(error.response?.data?.error || 'Signin failed');
         }
     }
 );

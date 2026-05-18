@@ -19,6 +19,7 @@ export interface LoginRequest {
 export interface SignupRequest {
     email: string;
     fullName: string;
+    mobile?: string;
     otp: string;
     navigate:any
 }

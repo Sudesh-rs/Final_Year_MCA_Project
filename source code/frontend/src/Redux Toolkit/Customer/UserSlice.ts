@@ -1,6 +1,6 @@
 // src/slices/userSlice.ts
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
-import { type User, type UserState } from "../../types/userTypes";
+import { type User, type UserState, type Address } from "../../types/userTypes";
 import { api } from "../../Config/Api";
 import {type  RootState } from "../Store";
 
@@ -39,6 +39,40 @@ export const fetchUserProfile = createAsyncThunk<
   }
 );
 
+export const addUserAddress = createAsyncThunk<
+  User,
+  { address: Address; jwt: string }
+>(
+  "user/addAddress",
+  async ({ address, jwt }, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`${API_URL}/address`, address, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to add address");
+    }
+  }
+);
+
+export const removeUserAddress = createAsyncThunk<
+  User,
+  { addressId: string; jwt: string }
+>(
+  "user/removeAddress",
+  async ({ addressId, jwt }, { rejectWithValue }) => {
+    try {
+      const response = await api.delete(`${API_URL}/address/${addressId}`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || "Failed to remove address");
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -64,6 +98,32 @@ const userSlice = createSlice({
         }
       )
       .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(addUserAddress.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addUserAddress.fulfilled, (state, action: PayloadAction<User>) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.profileUpdated = true;
+      })
+      .addCase(addUserAddress.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(removeUserAddress.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(removeUserAddress.fulfilled, (state, action: PayloadAction<User>) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.profileUpdated = true;
+      })
+      .addCase(removeUserAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
