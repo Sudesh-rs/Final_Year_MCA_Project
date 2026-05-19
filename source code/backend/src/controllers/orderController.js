@@ -19,32 +19,23 @@ class OrderController {
         const user = await req.user;
 
         const cart = await CartService.findUserCart(user);
-        const orders = await OrderService.createOrder(user, shippingAddress, cart);
-
-        const paymentOrder = await PaymentService.createOrder(user, orders);
+        const orders = await OrderService.createOrder(user, shippingAddress, cart, paymentMethod);
 
         const response = {};
 
-        console.log("rresponse ",response,paymentMethod,"--",PaymentMethod.RAZORPAY,"--",paymentMethod === PaymentMethod.RAZORPAY)
+        if (paymentMethod === PaymentMethod.RAZORPAY || paymentMethod === PaymentMethod.STRIPE) {
+            const paymentOrder = await PaymentService.createOrder(user, orders, paymentMethod);
 
-        if (paymentMethod === PaymentMethod.RAZORPAY) {
-            const payment = await PaymentService.createRazorpayPaymentLink(user, paymentOrder.amount, paymentOrder._id);
-            const paymentUrl = payment.short_url;
-            const paymentUrlId = payment.id;
-
-            response.payment_link_url = paymentUrl;
-
-            paymentOrder.paymentLinkId = paymentUrlId;
-            await PaymentOrder.findByIdAndUpdate(paymentOrder._id,paymentOrder)
-            // await this.paymentOrderRepository.save(paymentOrder);
-            console.log('payment -- ',payment)
-
-        } else if (paymentMethod === PaymentMethod.STRIPE) {
-            const paymentUrl = await PaymentService.createStripePaymentLink(user, paymentOrder.amount, paymentOrder._id);
-            response.payment_link_url = paymentUrl;
+            if (paymentMethod === PaymentMethod.RAZORPAY) {
+                const payment = await PaymentService.createRazorpayPaymentLink(user, paymentOrder.amount, paymentOrder._id);
+                response.payment_link_url = payment.short_url;
+                paymentOrder.paymentLinkId = payment.id;
+                await PaymentOrder.findByIdAndUpdate(paymentOrder._id, paymentOrder);
+            } else if (paymentMethod === PaymentMethod.STRIPE) {
+                const paymentUrl = await PaymentService.createStripePaymentLink(user, paymentOrder.amount, paymentOrder._id);
+                response.payment_link_url = paymentUrl;
+            }
         }
-
-       
 
         return res.status(200).json(response);
 

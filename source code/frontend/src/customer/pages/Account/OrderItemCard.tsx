@@ -30,6 +30,7 @@ const OrderItemCard:React.FC<OrderItemCardProps> = ({item,order}) => {
                     <h1 className='font-bold text-teal-600'>{order.orderStatus}
                     </h1>
                     <p>Arriving by {formatDate(order.deliverDate)}</p>
+                    <p className='text-xs text-gray-500'>Payment: {order.paymentMethod === 'PAY_ON_DELIVERY' ? 'Cash On Delivery' : 'Online Payment'}</p>
                 </div>
             </div>
             <div className='p-5 bg-teal-50 flex gap-3 '>

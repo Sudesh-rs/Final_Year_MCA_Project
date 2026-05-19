@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import PricingCard from '../Cart/PricingCard'
-import { Box, Button, FormControlLabel, Modal, Radio, RadioGroup } from '@mui/material'
+import { Alert, Box, Button, FormControlLabel, Modal, Radio, RadioGroup, Snackbar } from '@mui/material'
 import AddressForm from './AddresssForm'
 import AddressCard from './AddressCard'
 import AddIcon from '@mui/icons-material/Add';
 import { createOrder } from '../../../Redux Toolkit/Customer/OrderSlice'
 import { useAppDispatch, useAppSelector } from '../../../Redux Toolkit/Store'
+import { useNavigate } from 'react-router-dom';
 
 const style = {
     position: 'absolute',
@@ -25,21 +26,24 @@ const paymentGatwayList = [
         label: "Razarpay"
     },
     {
-        value: "STRIPE",
-        image: "/stripe_logo.png",
-        label: "Stripe"
+        value: "PAY_ON_DELIVERY",
+        image: "/cash-on-delivery.png",
+        label: "Cash On Delivery"
     }
 ]
 const AddressPage = () => {
     
     const [value, setValue] = React.useState(0);
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
     const { user } = useAppSelector(store => store)
     const [paymentGateway, setPaymentGateway] = useState(paymentGatwayList[0].value);
 
     const [open, setOpen] = React.useState(false);
+    const [codSuccessOpen, setCodSuccessOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    const handleCloseSnackbar = () => setCodSuccessOpen(false);
 
     const handleChange = (event: any) => {
         console.log("-----", event.target.value)
@@ -47,12 +51,22 @@ const AddressPage = () => {
     };
 
     const handleCreateOrder = () => {
-        if (user.user?.addresses)
+        if (user.user?.addresses) {
             dispatch(createOrder({
                 paymentGateway,
                 address: user.user?.addresses[value],
                 jwt: localStorage.getItem('jwt') || ""
             }))
+            .unwrap()
+            .then((res) => {
+                if (paymentGateway === 'PAY_ON_DELIVERY') {
+                    setCodSuccessOpen(true);
+                    setTimeout(() => navigate('/account/orders'), 1200);
+                } else if (res.payment_link_url) {
+                    window.location.href = res.payment_link_url;
+                }
+            });
+        }
     }
 
     const handlePaymentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,9 +145,18 @@ const AddressPage = () => {
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={style}>
-                    <AddressForm paymentGateway={paymentGateway} handleClose={handleClose} />
+                    <AddressForm paymentGateway={paymentGateway} handleClose={handleClose} onCodSuccess={() => {
+                        setCodSuccessOpen(true);
+                        setTimeout(() => navigate('/account/orders'), 1200);
+                    }} />
                 </Box>
             </Modal>
+
+            <Snackbar open={codSuccessOpen} autoHideDuration={4000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleCloseSnackbar} severity='success' sx={{ width: '100%' }}>
+                    Order placed successfully with Cash On Delivery.
+                </Alert>
+            </Snackbar>
         </div>
     )
 }

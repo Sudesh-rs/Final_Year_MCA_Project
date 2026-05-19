@@ -2,14 +2,17 @@ import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import {
+  Alert,
   Box,
   Button,
+  Snackbar,
   TextField,
   Grid,
 } from '@mui/material';
 import { useAppDispatch } from '../../../Redux Toolkit/Store';
 import { createOrder } from '../../../Redux Toolkit/Customer/OrderSlice';
 import type { Address } from '../../../types/userTypes';
+import { useNavigate } from 'react-router-dom';
 
 // Validation schema
 const ContactSchema = Yup.object().shape({
@@ -29,10 +32,14 @@ const ContactSchema = Yup.object().shape({
 interface AddressFormProp {
   handleClose: () => void;
   paymentGateway:string
+  onCodSuccess?: () => void;
 }
 
-const AddressForm:React.FC<AddressFormProp> = ({handleClose,paymentGateway}) => {
+const AddressForm:React.FC<AddressFormProp> = ({handleClose,paymentGateway,onCodSuccess}) => {
   const dispatch=useAppDispatch()
+  const navigate = useNavigate();
+  const [successOpen, setSuccessOpen] = React.useState(false);
+  const handleCloseSnackbar = () => setSuccessOpen(false);
   const formik = useFormik({
     initialValues: {
       name: '',
@@ -53,6 +60,20 @@ const AddressForm:React.FC<AddressFormProp> = ({handleClose,paymentGateway}) => 
 
   const handleCreateOrder=(address:Address)=>{
     dispatch(createOrder({address,jwt:localStorage.getItem('jwt')|| "",paymentGateway}))
+      .unwrap()
+      .then((res) => {
+        if (paymentGateway === 'PAY_ON_DELIVERY') {
+          handleClose();
+          if (onCodSuccess) {
+            onCodSuccess();
+          } else {
+            setSuccessOpen(true);
+            setTimeout(() => navigate('/account/orders'), 1200);
+          }
+        } else if (res.payment_link_url) {
+          window.location.href = res.payment_link_url;
+        }
+      });
   }
 
   return (
@@ -153,6 +174,11 @@ const AddressForm:React.FC<AddressFormProp> = ({handleClose,paymentGateway}) => 
           </Grid>
         </Grid>
       </form>
+      <Snackbar open={successOpen} autoHideDuration={4000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+        <Alert onClose={handleCloseSnackbar} severity='success' sx={{ width: '100%' }}>
+          Order placed successfully with Cash On Delivery.
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

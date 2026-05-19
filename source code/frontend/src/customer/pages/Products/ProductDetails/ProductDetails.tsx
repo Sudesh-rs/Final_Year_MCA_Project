@@ -9,12 +9,14 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import SmilarProduct from '../SimilarProduct/SmilarProduct';
 import ZoomableImage from './ZoomableImage';
 import { useAppDispatch, useAppSelector } from '../../../../Redux Toolkit/Store';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchProductById, getAllProducts } from '../../../../Redux Toolkit/Customer/ProductSlice';
 import { addItemToCart } from '../../../../Redux Toolkit/Customer/CartSlice';
+import { addProductToWishlist } from '../../../../Redux Toolkit/Customer/WishlistSlice';
 import ProductReviewCard from '../../Review/ProductReviewCard';
 import RatingCard from '../../Review/RatingCard';
 import { fetchReviewsByProductId } from '../../../../Redux Toolkit/Customer/ReviewSlice';
@@ -38,12 +40,11 @@ const ProductDetails = () => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const dispatch = useAppDispatch();
-    const { products, review } = useAppSelector(store => store)
+    const { products, review, wishlist } = useAppSelector(store => store)
     const navigate = useNavigate()
     const { productId,categoryId } = useParams()
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1)
-
 
     useEffect(() => {
 
@@ -137,7 +138,7 @@ const ProductDetails = () => {
 
                         <div className='flex items-center gap-4'>
                             <Wallet sx={{ color: teal[400] }} />
-                            <p>Pay on delivery might be available</p>
+                            <p>Cash on delivery might be available</p>
                         </div>
 
 
@@ -169,9 +170,18 @@ const ProductDetails = () => {
                             Add To Bag
                         </Button>
                         <Button
+                            onClick={() => {
+                              if (productId) dispatch(addProductToWishlist({ productId }));
+                            }}
                             sx={{ py: "1rem" }}
-                            variant='outlined' fullWidth startIcon={<FavoriteBorderIcon />}>
-                            Whishlist
+                            variant='outlined' fullWidth startIcon={
+                              wishlist.wishlist?.products?.some(
+                                (product) => product._id === productId
+                              ) ? <FavoriteIcon /> : <FavoriteBorderIcon />
+                            }>
+                            {wishlist.wishlist?.products?.some(
+                              (product) => product._id === productId
+                            ) ? 'Wishlisted' : 'Wishlist'}
                         </Button>
 
                     </div>

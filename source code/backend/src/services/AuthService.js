@@ -38,7 +38,7 @@ class AuthService {
     }
 
     async createUser(req) {
-        const { email, fullName, mobile, otp } = req;
+        const { email, fullName, mobile, otp, profileImage } = req;
 
         const verificationCode = await VerificationCode.findOne({ email });
 
@@ -48,13 +48,15 @@ class AuthService {
 
         let user = await User.findOne({ email });
 
+
         if (!user) {
             user = new User({
                 email,
                 fullName,
                 mobile,
                 role: 'ROLE_CUSTOMER',
-                password: await bcrypt.hash(otp, 10)
+                password: await bcrypt.hash(otp, 10),
+                profileImage: profileImage || undefined,
             });
 
             await user.save();

@@ -13,6 +13,7 @@ const LoginForm = () => {
     const [otp, setOtp] = useState("");
     const [timer, setTimer] = useState<number>(30); // Timer state
     const [isTimerActive, setIsTimerActive] = useState<boolean>(false);
+    const [emailSent, setEmailSent] = useState<boolean>(false);
     const dispatch = useAppDispatch();
     const { auth } = useAppSelector(store => store)
 
@@ -35,16 +36,29 @@ const LoginForm = () => {
 
     };
 
-    const handleResendOTP = () => {
+    const handleResendOTP = async () => {
         // Implement OTP resend logic
-        dispatch(sendLoginSignupOtp({ email: "signing_"+formik.values.email }))
-        console.log('Resend OTP');
-        setTimer(30);
-        setIsTimerActive(true);
+        try {
+            await dispatch(sendLoginSignupOtp({ email: formik.values.email }));
+            setTimer(30);
+            setIsTimerActive(true);
+            setEmailSent(true);
+        } catch (e) {
+            console.error('Resend OTP error', e);
+        }
     };
 
-    const handleSentOtp = () => {
-        handleResendOTP();
+    const handleSentOtp = async () => {
+        // send OTP for the provided email
+        if (!formik.values.email) return;
+        try {
+            await dispatch(sendLoginSignupOtp({ email: formik.values.email }));
+            setEmailSent(true);
+            setTimer(30);
+            setIsTimerActive(true);
+        } catch (e) {
+            console.error('Send OTP error', e);
+        }
     }
 
     const handleLogin = () => {
@@ -92,7 +106,7 @@ const LoginForm = () => {
                     helperText={formik.touched.email ? formik.errors.email as string : undefined}
                 />
 
-                {auth.otpSent && <div className="space-y-2">
+                {emailSent && <div className="space-y-2">
                     <p className="font-medium text-sm">
                         * Enter OTP sent to your email
                     </p>
@@ -119,19 +133,19 @@ const LoginForm = () => {
                     {formik.touched.otp && formik.errors.otp && <p>{formik.errors.otp as string}</p>}
                 </div>}
 
-                {auth.otpSent && <div>
+                {emailSent && <div>
                     <Button disabled={auth.loading} onClick={handleLogin}
                         fullWidth variant='contained' sx={{ py: "11px" }}>{
                             auth.loading ? <CircularProgress  />: "Login"}</Button>
                 </div>}
 
-                {!auth.otpSent && <Button
+                {!emailSent && <Button
                 disabled={auth.loading}
                     fullWidth
                     variant='contained'
                     onClick={handleSentOtp}
                     sx={{ py: "11px" }}>{
-                        auth.loading ? <CircularProgress  />: "sent otp"}</Button>
+                        auth.loading ? <CircularProgress  />: "Send OTP"}</Button>
                 }
 
 

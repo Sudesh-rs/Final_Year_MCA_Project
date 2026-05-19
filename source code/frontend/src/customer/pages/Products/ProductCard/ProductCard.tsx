@@ -32,7 +32,8 @@ const style = {
 const ProductCard: React.FC<ProductCardProps> = ({ item, categoryId }) => {
   const [currentImage, setCurrentImage] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const { wishlist } = useAppSelector((store) => store);
+  const { auth, wishlist } = useAppSelector((store) => store);
+  const isLoggedIn = Boolean(auth.jwt || localStorage.getItem("jwt"));
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [showChatBot, setShowChatBot] = useState(false);
@@ -74,10 +75,27 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, categoryId }) => {
         className="group px-4 relative"
       >
         <div
-          className="card "
+          className="card relative"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
+          {isLoggedIn && (
+            <div className="absolute top-3 right-3 z-30">
+              <Button
+                type="button"
+                variant="contained"
+                color="secondary"
+                sx={{ minWidth: 0, padding: '6px' }}
+                onClick={handleAddWishlist}
+              >
+                {isWishlisted(wishlist.wishlist, item) ? (
+                  <FavoriteIcon sx={{ color: teal[500] }} />
+                ) : (
+                  <FavoriteBorderIcon sx={{ color: 'gray' }} />
+                )}
+              </Button>
+            </div>
+          )}
           {item.images.map((image: any, index: number) => (
             <img
               key={index}
@@ -104,21 +122,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, categoryId }) => {
               </div>
 
               <div className="flex gap-3">
-                {wishlist.wishlist && (
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    sx={{ zIndex: 10 }}
-                    className=" z-50"
-                    onClick={handleAddWishlist}
-                  >
-                    {isWishlisted(wishlist.wishlist, item) ? (
-                      <FavoriteIcon sx={{ color: teal[500] }} />
-                    ) : (
-                      <FavoriteBorderIcon sx={{ color: "gray" }} />
-                    )}
-                  </Button>
-                )}
                 <Button
                   onClick={handleShowChatBot}
                   color="secondary"

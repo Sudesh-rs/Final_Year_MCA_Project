@@ -20,19 +20,17 @@ const Auth = () => {
     }, [auth.otpSent,auth.error])
 
     return (
-        <div className='flex justify-center h-[90vh] items-center'>
-            <div className='max-w-md h-[85vh] rounded-md border shadow-lg '>
-                <img className='w-full rounded-t-md' src="/login_banner.png" alt="" />
-                <div className='mt-8 px-10'>
+        <div className='flex justify-center items-center min-h-screen py-12'>
+            <div className='w-full max-w-md rounded-md border shadow-lg overflow-hidden'>
+                <img className='w-full block' src="/login_banner.png" alt="" />
+                <div className='mt-6 px-6 pb-8'>
                     {isLoginPage ? <LoginForm /> : <SignupForm />}
 
                     <div className='flex items-center gap-1 justify-center mt-5'>
-                        <p>{isLoginPage && "Don't"} have Account ?</p>
-                        <Button onClick={() => setIsLoginPage(!isLoginPage)} size='small'>{isLoginPage ? "create account" : "login"}</Button>
+                        <p className='text-sm'>{isLoginPage ? "Don't have an account?" : "Have an account?"}</p>
+                        <Button onClick={() => setIsLoginPage(!isLoginPage)} size='small'>{isLoginPage ? "Create account" : "Login"}</Button>
                     </div>
                 </div>
-
-
             </div>
             <Snackbar
                 anchorOrigin={{ vertical: "top", horizontal: "right" }}

@@ -6,6 +6,7 @@ import {
 
 import ProfileFildCard from "../../../seller/pages/Account/ProfileFildCard";
 import { useAppSelector } from "../../../Redux Toolkit/Store";
+import { Avatar } from '@mui/material';
 
 const UserDetails = () => {
   const { user } = useAppSelector((store) => store);
@@ -31,10 +32,10 @@ const UserDetails = () => {
           </div> */}
         </div>
         <div className="space-y-5">
-          {/* <Avatar
-            sx={{ width: "10rem", height: "10rem" }}
-            src="https://cdn.pixabay.com/photo/2014/11/29/19/33/bald-eagle-550804_640.jpg"
-          /> */}
+          <div className='flex items-center gap-5'>
+            <Avatar sx={{ width: "6rem", height: "6rem" }} src={user.user?.profileImage || '/default-avatar.svg'} />
+            <h1 className='text-xl font-bold'>{user.user?.fullName}</h1>
+          </div>
           <div>
             <ProfileFildCard keys={"Name"} value={user.user?.fullName} />
             <Divider />

@@ -25,6 +25,8 @@ export interface Order {
     totalSellingPrice?: number; // Optional field
     discount?: number; // Optional field
     orderStatus: OrderStatus;
+    paymentMethod?: string;
+    paymentStatus?: string;
     totalItem: number;
     deliverDate:string;
 }

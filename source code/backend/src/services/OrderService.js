@@ -7,11 +7,12 @@ const CartService = require("../services/CartService");
 const OrderError = require("../exceptions/OrderError");
 const OrderStatus = require("../domain/OrderStatus");
 const PaymentStatus = require("../domain/PaymentStatus");
+const PaymentMethod = require("../domain/PaymentMethod");
 const mongoose = require("mongoose");
 const TransactionService = require("./TransactionService");
 
 class OrderService {
-  async createOrder(user, shippingAddress, cart) {
+  async createOrder(user, shippingAddress, cart, paymentMethod) {
     console.log("shpping address: start", shippingAddress);
    try {
      if (shippingAddress._id && !user.addresses.includes(shippingAddress._id)) {
@@ -54,8 +55,12 @@ class OrderService {
         totalSellingPrice: totalOrderPrice,
         totalItem: totalItemCount,
         shippingAddress: shippingAddress._id,
-        orderStatus: OrderStatus.PENDING,
-        paymentDetails: { status: PaymentStatus.PENDING },
+        orderStatus:
+          paymentMethod === PaymentMethod.PAY_ON_DELIVERY
+            ? OrderStatus.PLACED
+            : OrderStatus.PENDING,
+        paymentMethod: paymentMethod || PaymentMethod.PAY_ON_DELIVERY,
+        paymentStatus: PaymentStatus.PENDING,
         orderItems: [],
       });
 

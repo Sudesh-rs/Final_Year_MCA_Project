@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema(
     mobile: {
       type: String,
     },
+    profileImage: {
+      type: String,
+      default: '/default-avatar.png',
+    },
     role: {
       type: String,
       enum: [UserRoles.CUSTOMER, UserRoles.SELLER, UserRoles.ADMIN], 

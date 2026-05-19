@@ -44,8 +44,22 @@ export const signup = createAsyncThunk<AuthResponse, SignupRequest>(
     async (signupRequest, { rejectWithValue }) => {
         console.log("signup ", signupRequest)
         try {
-            
-            const response = await api.post<AuthResponse>(`${API_URL}/signup`, signupRequest);
+            let response;
+            // if profileImage is a File, submit as FormData
+            if ((signupRequest as any).profileImage instanceof File) {
+                const form = new FormData();
+                form.append('fullName', (signupRequest as any).fullName);
+                form.append('email', (signupRequest as any).email);
+                form.append('mobile', (signupRequest as any).mobile || '');
+                form.append('otp', (signupRequest as any).otp || '');
+                form.append('profileImage', (signupRequest as any).profileImage);
+                response = await api.post(`${API_URL}/signup`, form, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                } as any);
+            } else {
+                response = await api.post<AuthResponse>(`${API_URL}/signup`, signupRequest as any);
+            }
+
            signupRequest.navigate("/")
            localStorage.setItem("jwt",response.data.jwt)
             return response.data;

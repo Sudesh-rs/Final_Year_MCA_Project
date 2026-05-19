@@ -51,6 +51,11 @@ const orderSchema = new Schema({
         enum: Object.values(PaymentStatus),
         default: PaymentStatus.PENDING,
     },
+    paymentMethod: {
+        type: String,
+        enum: Object.values(require('../domain/PaymentMethod')),
+        required: true,
+    },
     orderDate: {
         type: Date,
         default: Date.now,

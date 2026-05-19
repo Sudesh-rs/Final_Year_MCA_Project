@@ -25,8 +25,14 @@ class AuthController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({ errors: errors.array() });
             }
+            // build payload including uploaded file (if any)
+            const payload = { ...req.body };
+            if (req.file && req.file.filename) {
+                // save relative path that frontend can load from public
+                payload.profileImage = `/uploads/${req.file.filename}`;
+            }
 
-            const token = await AuthService.createUser(req.body);
+            const token = await AuthService.createUser(payload);
             const authResponse = {
                 jwt: token,
                 message: "Register Success",

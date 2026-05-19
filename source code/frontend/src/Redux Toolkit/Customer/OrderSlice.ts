@@ -73,10 +73,6 @@ export const createOrder = createAsyncThunk<
         }
       );
       console.log("order created ", response.data);
-      if (response.data.payment_link_url) {
-        window.location.href = response.data.payment_link_url;
-      }
-
       return response.data;
     } catch (error: any) {
       console.log("error ", error.response);

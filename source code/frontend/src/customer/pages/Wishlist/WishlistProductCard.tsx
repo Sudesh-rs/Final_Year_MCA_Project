@@ -4,6 +4,8 @@ import { useAppDispatch } from "../../../Redux Toolkit/Store";
 import CloseIcon from "@mui/icons-material/Close";
 import { addProductToWishlist } from "../../../Redux Toolkit/Customer/WishlistSlice";
 import { Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import type { MouseEvent } from 'react';
 
 interface ProductCardProps {
   item: Product;
@@ -11,13 +13,24 @@ interface ProductCardProps {
 
 const WishlistProductCard: React.FC<ProductCardProps> = ({ item }) => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
-  const handleIconClick = () => {
+  const handleIconClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
     if (item._id) dispatch(addProductToWishlist({ productId: item._id }));
   };
 
+  const handleCardClick = () => {
+    navigate(
+      `/product-details/${item.category?.categoryId ?? "unknown"}/${item.title}/${item._id}`
+    );
+  };
+
   return (
-    <div className="w-60 relative ">
+    <div
+      onClick={handleCardClick}
+      className="w-60 relative cursor-pointer hover:shadow-lg transition-shadow duration-200"
+    >
       <div className="w-full">
         <img
           className=" object-top w-full"
@@ -44,7 +57,7 @@ const WishlistProductCard: React.FC<ProductCardProps> = ({ item }) => {
       </div>
 
       <div className="absolute top-1 right-1">
-        <Button onClick={handleIconClick}>
+        <Button type="button" onClick={handleIconClick}>
           <CloseIcon
             className="cursor-pointer bg-white rounded-full p-1"
             sx={{ color: teal[500], fontSize: "2rem" }}

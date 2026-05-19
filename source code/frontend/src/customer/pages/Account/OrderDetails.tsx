@@ -85,9 +85,7 @@ const OrderDetails = () => {
         <div className='px-5 '>
           <div className='bg-teal-50 px-5 py-2 text-xs font-medium flex items-center gap-3 '>
             <PaymentsIcon />
-            <p >Pay On Delivery</p>
-
-
+            <p>{orders.currentOrder?.paymentMethod === 'PAY_ON_DELIVERY' ? 'Cash On Delivery' : 'Online Payment'}</p>
           </div>
         </div>
 

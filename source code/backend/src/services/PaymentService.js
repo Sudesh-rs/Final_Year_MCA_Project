@@ -17,13 +17,14 @@ const OrderStatus = require('../domain/OrderStatus');
 class PaymentService {
 
 
-    async createOrder(user, orders) {
+    async createOrder(user, orders, paymentMethod) {
         const amount = orders.reduce((sum, order) => sum + order.totalSellingPrice, 0);
 
         const paymentOrder = new PaymentOrder({
             amount,
             user: user._id,
-            orders: orders.map(order => order._id) // Saving order IDs
+            orders: orders.map(order => order._id),
+            paymentMethod: paymentMethod || require('../domain/PaymentMethod').RAZORPAY,
         });
 
         return await paymentOrder.save();
