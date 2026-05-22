@@ -1,15 +1,16 @@
 const nodemailer = require('nodemailer');
+
 async function sendVerificationEmail(to, subject, text) {
     const transporter = nodemailer.createTransport({
-        service: 'gmail', 
+        service: 'gmail',
         auth: {
-            user: 'sudeshsawant162@gmail.com',
-            pass: 'yqzgqucumuaqlzai' 
+            user: process.env.EMAIL,
+            pass: process.env.EMAIL_PASSWORD
         }
     });
 
     const mailOptions = {
-        from: 'your email',
+        from: process.env.EMAIL,
         to,
         subject,
         text
