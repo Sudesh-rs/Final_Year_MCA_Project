@@ -12,7 +12,16 @@ app.get('/', (req, res) => {
   res.send({message:'Welcome To IntelliMart Backend System!'});
 });
 
-app.use(bodyParser.json());
+// Allow non-object JSON bodies (e.g., null) and provide clearer parse errors
+app.use(bodyParser.json({ strict: false }));
+
+// JSON parse error handler
+app.use((err, req, res, next) => {
+  if (err && err.type === 'entity.parse.failed') {
+    return res.status(400).json({ error: 'Invalid JSON payload' });
+  }
+  next();
+});
 
 const productRouters=require("./routers/productRoutes.js")
 const authRouters=require("./routers/authRouters.js")

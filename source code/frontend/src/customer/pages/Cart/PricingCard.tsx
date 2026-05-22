@@ -31,6 +31,12 @@ const PricingCard = () => {
           <span>plateform fee</span>
           <span className="text-teal-600">Free</span>
         </div>
+        {cart.cart?.couponCode && (
+          <div className="flex justify-between items-center text-green-600">
+            <span>Coupon ({cart.cart?.couponCode})</span>
+            <span>-₹ {cart.cart?.couponPrice}</span>
+          </div>
+        )}
       </div>
       <Divider />
 

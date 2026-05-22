@@ -1,23 +1,24 @@
 const couponService = require("../services/CouponService");
-const UserService = require("../services/UserService");
 
 class couponController {
   async applyCoupon(req, res) {
     try {
-      const { apply, code, orderValue } = req.body;
+      const { apply, code } = req.query;
 
-      const user = await req.useeer
+      const user = req.user; // populated by userAuthMiddleware
+      console.log('Apply coupon called:', { apply, code, userId: user ? user._id : null });
       let cart;
 
       if (apply === "true") {
-        cart = await couponService.applyCoupon(code, orderValue, user);
+        cart = await couponService.applyCoupon(code, user);
       } else {
         cart = await couponService.removeCoupon(code, user);
       }
 
       return res.status(200).json(cart);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      const status = error.statusCode || 500;
+      return res.status(status).json({ error: error.message });
     }
   }
 
@@ -27,7 +28,8 @@ class couponController {
       const coupon = await couponService.createCoupon(req.body);
       return res.status(200).json(coupon);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      const status = error.statusCode || 500;
+      return res.status(status).json({ error: error.message });
     }
   }
 
@@ -37,7 +39,8 @@ class couponController {
       await couponService.deleteCoupon(req.params.id);
       return res.status(200).json({ message: "Coupon deleted successfully" });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      const status = error.statusCode || 500;
+      return res.status(status).json({ error: error.message });
     }
   }
 
@@ -47,7 +50,8 @@ class couponController {
       const coupons = await couponService.getAllCoupons();
       return res.status(200).json(coupons);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      const status = error.statusCode || 500;
+      return res.status(status).json({ error: error.message });
     }
   }
 }
