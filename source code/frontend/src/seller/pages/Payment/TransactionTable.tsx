@@ -42,25 +42,25 @@ export default function TransactionTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {transaction.transactions.map((item: Transaction) => (
+            {(transaction.transactions || []).map((item: Transaction) => (
               <TableRow key={item._id}>
                 <TableCell align="left"><div className='space-y-1'>
-                  <h1 className='font-medium'>{redableDateTime(item.date).split("at")[0]}</h1>
-                  <h1 className='text-xs text-gray-600 font-semibold'>{redableDateTime(item.date).split("at")[1]}</h1>
+                  <h1 className='font-medium'>{item.date ? redableDateTime(item.date).split("at")[0] : '-'}</h1>
+                  <h1 className='text-xs text-gray-600 font-semibold'>{item.date ? redableDateTime(item.date).split("at")[1] : ''}</h1>
                   </div></TableCell>
                 <TableCell component="th" scope="row">
                   <div className='space-y-2'>
-                    <h1>{item.customer.fullName}</h1>
-                    <h1 className='font-semibold'>{item.customer.email}</h1>
-                    <h1 className='font-bold text-gray-600'>{item.customer.mobile}</h1>
+                    <h1>{item.customer?.fullName}</h1>
+                    <h1 className='font-semibold'>{item.customer?.email}</h1>
+                    <h1 className='font-bold text-gray-600'>{item.customer?.mobile}</h1>
                   </div>
                 </TableCell>
                 <TableCell>
-                  Order Id : <strong> {item.order._id} </strong> 
+                  Order Id : <strong> {item.order?._id} </strong> 
                 </TableCell>
                 <TableCell
                   align="right">
-                  ₹{item.order.totalSellingPrice}
+                  ₹{item.order?.totalSellingPrice || 0}
                 </TableCell>
                 {/* <TableCell align="right">
                   <Button

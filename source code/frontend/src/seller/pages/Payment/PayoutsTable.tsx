@@ -33,22 +33,22 @@ const PayoutsTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {sellerOrder.orders.map((item: Order) => (
+            {(sellerOrder.orders || []).map((item: Order) => (
               <TableRow key={item._id}>
                 <TableCell align="left">{item._id}</TableCell>
                 <TableCell component="th" scope="row">
                   <div className="flex gap-1 flex-wrap">
-                    {item.orderItems.map((orderItem: OrderItem) => (
+                    {item.orderItems?.map((orderItem: OrderItem) => (
                       <div key={orderItem._id} className="flex gap-5">
                         <img
                           className="w-20 rounded-md"
-                          src={orderItem.product.images[0]}
+                          src={orderItem.product?.images?.[0] || ''}
                           alt=""
                         />
                         <div className="flex flex-col justify-between py-2">
-                          <h1>Title: {orderItem.product.title}</h1>
-                          <h1>Price: Rs.{orderItem.product.sellingPrice}</h1>
-                          <h1>Color: {orderItem.product.color}</h1>
+                          <h1>Title: {orderItem.product?.title}</h1>
+                          <h1>Price: Rs.{orderItem.product?.sellingPrice}</h1>
+                          <h1>Color: {orderItem.product?.color}</h1>
                           <h1>Size: {orderItem.size}</h1>
                         </div>
                       </div>

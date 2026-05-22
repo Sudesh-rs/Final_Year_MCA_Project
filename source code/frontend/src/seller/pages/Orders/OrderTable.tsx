@@ -53,13 +53,13 @@ export default function OrderTable() {
   const { sellerOrder } = useAppSelector(store => store);
   const dispatch = useAppDispatch();
 
-  const [anchorEl, setAnchorEl] = React.useState<{ [key: number]: HTMLElement | null }>({});
+  const [anchorEl, setAnchorEl] = React.useState<{ [key: string]: HTMLElement | null }>({});
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>, orderId: number) => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>, orderId: string) => {
     setAnchorEl((prev) => ({ ...prev, [orderId]: event.currentTarget }));
   };
 
-  const handleClose = (orderId: number) => {
+  const handleClose = (orderId: string) => {
     setAnchorEl((prev) => ({ ...prev, [orderId]: null }));
   };
 
@@ -92,18 +92,18 @@ export default function OrderTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {sellerOrder.orders.map((item: Order) => (
+            {(sellerOrder.orders || []).map((item: Order) => (
               <StyledTableRow key={item._id}>
                 <StyledTableCell align="left">{item._id}</StyledTableCell>
                 <StyledTableCell component="th" scope="row">
                   <div className='flex gap-1 flex-wrap'>
-                    {item.orderItems.map((orderItem: OrderItem) =>
+                    {item.orderItems?.map((orderItem: OrderItem) =>
                       <div key={orderItem._id} className='flex gap-5'>
-                        <img className='w-20 rounded-md' src={orderItem.product.images[0]} alt="" />
+                        <img className='w-20 rounded-md' src={orderItem.product?.images?.[0] || ''} alt="" />
                         <div className='flex flex-col justify-between py-2'>
-                          <h1>Title: {orderItem.product.title}</h1>
-                          <h1>Price: Rs.{orderItem.product.sellingPrice}</h1>
-                          <h1>Color: {orderItem.product.color}</h1>
+                          <h1>Title: {orderItem.product?.title}</h1>
+                          <h1>Price: Rs.{orderItem.product?.sellingPrice}</h1>
+                          <h1>Color: {orderItem.product?.color}</h1>
                           <h1>Size: {orderItem.size}</h1>
                         </div>
                       </div>
@@ -112,30 +112,30 @@ export default function OrderTable() {
                 </StyledTableCell>
                 <StyledTableCell>
                   <div className='flex flex-col gap-y-2'>
-                    <h1>{item.shippingAddress.name}</h1>
-                    <h1>{item.shippingAddress.address}, {item.shippingAddress.city}</h1>
-                    <h1>{item.shippingAddress.state} - {item.shippingAddress.pinCode}</h1>
-                    <h1><strong>Mobile:</strong> {item.shippingAddress.mobile}</h1>
+                    <h1>{item.shippingAddress?.name}</h1>
+                    <h1>{item.shippingAddress?.address}, {item.shippingAddress?.city}</h1>
+                    <h1>{item.shippingAddress?.state} - {item.shippingAddress?.pinCode}</h1>
+                    <h1><strong>Mobile:</strong> {item.shippingAddress?.mobile}</h1>
                   </div>
                 </StyledTableCell>
                 <StyledTableCell 
-                 sx={{color:orderStatusColor[item.orderStatus].color}} 
-                 align="center"> <Box sx={{borderColor:orderStatusColor[item.orderStatus].color}}  className={`border px-2 py-1 rounded-full text-xs`}>
+                 sx={{color:orderStatusColor[item.orderStatus]?.color || 'inherit'}} 
+                 align="center"> <Box sx={{borderColor:orderStatusColor[item.orderStatus]?.color || 'inherit'}}  className={`border px-2 py-1 rounded-full text-xs`}>
                   {item.orderStatus}</Box> 
                  </StyledTableCell>
                 <StyledTableCell align="right">
                   <Button
                     size='small'
-                    onClick={(e) => handleClick(e, item._id)}
+                    onClick={(e) => handleClick(e, String(item._id))}
                     color='primary'
                     className='bg-primary-color'>
                     Status
                   </Button>
                   <Menu
                     id={`status-menu ${item._id}`}
-                    anchorEl={anchorEl[item._id]}
-                    open={Boolean(anchorEl[item._id])}
-                    onClose={() => handleClose(item._id)}
+                    anchorEl={anchorEl[String(item._id)]}
+                    open={Boolean(anchorEl[String(item._id)])}
+                    onClose={() => handleClose(String(item._id))}
                     MenuListProps={{
                       'aria-labelledby': `status-menu ${item._id}`,
                     }}
