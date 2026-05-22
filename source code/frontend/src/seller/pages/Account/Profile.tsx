@@ -69,7 +69,7 @@ const Profile = () => {
       <div className="w-full lg:w-[70%]  ">
         <div className="flex items-center pb-3 justify-between">
           <h1 className="text-2xl font-bold text-gray-600 ">
-            Salon Owner
+            Seller Profile
           </h1>
           <div>
             <Button
