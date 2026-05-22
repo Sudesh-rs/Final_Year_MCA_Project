@@ -199,7 +199,6 @@ const cartSlice = createSlice({
       .addCase(applyCoupon.fulfilled, (state, action) => {
         state.loading = false;
         state.cart = action.payload;
-        
       });
   },
 });
