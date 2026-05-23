@@ -11,8 +11,15 @@ class ChatboatController {
         return res.status(400).json({ message: "Message is required" });
       }
 
-      const answer = await ChatbotService.askProductQuestion(null, message);
-      return res.status(200).json({ answer });
+      const contents = [
+        {
+          role: "user",
+          parts: [{ text: message }],
+        },
+      ];
+
+      const data = await ChatbotService.chatService(contents);
+      return res.status(200).json({ answer: data });
 
     } catch (error) {
       return res.status(500).json({ error: error.message });

@@ -46,20 +46,20 @@ export const chatBot = createAsyncThunk<
 );
 
 export const askProductQuestion = createAsyncThunk<
-  any,
-  { productId?: string | null; question: string }
+  any,any
 >(
   "aiChatBot/askProductQuestion",
   async ({ productId, question }, { rejectWithValue }) => {
     try {
-      const url = productId ? `/chat/product/${productId}` : `/chat`;
-      const body = productId ? { question } : { message: question };
-
-      const response = await api.post<{ answer: string }>(url, body);
-      console.log("chat answer ----- ", response.data);
+      const response = await api.post<{ answer: string }>(
+        `/chat/product/${productId}`,
+        { question }
+      );
+      console.log("chat answer ----- ",response.data)
       return response.data.answer;
+      
     } catch (error: any) {
-      console.log("error --- ", error);
+      console.log("error --- ",error)
       const message =
         error.response?.data?.message ||
         error.message ||
@@ -73,14 +73,7 @@ export const askProductQuestion = createAsyncThunk<
 const aiChatBotSlice = createSlice({
   name: "aiChatBot",
   initialState,
-  reducers: {
-    resetChat: (state) => {
-      state.response = null;
-      state.loading = false;
-      state.error = null;
-      state.messages = [];
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(chatBot.pending, (state, action) => {
@@ -88,6 +81,8 @@ const aiChatBotSlice = createSlice({
         state.error = null;
         const { prompt } = action.meta.arg;
 
+        // You can log or use the data here
+        // console.log('Pending request:', { prompt, productId, userId });
         const userPrompt = { message: prompt.prompt, role: "user" };
         state.messages = [...state.messages, userPrompt];
       })
@@ -100,23 +95,27 @@ const aiChatBotSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      .addCase(askProductQuestion.pending, (state, action) => {
+      .addCase(askProductQuestion.pending, (state,action) => {
         state.loading = true;
-        state.error = null;
-        state.messages.push({ role: "user", message: action.meta.arg.question });
+        // state.productQuestion.error = null;
+        // state.productQuestion.answer = null;
+        state.messages.push({role:"user",message:action.meta.arg.question})
       })
-      .addCase(askProductQuestion.fulfilled, (state, action) => {
+      .addCase(
+        askProductQuestion.fulfilled,
+        (state, action) => {
+          state.loading = false;
+          // state.productQuestion.answer = action.payload;
+          console.log("ans - ", action.payload)
+          state.messages.push({role:'res',message:action.payload})
+        }
+      )
+      .addCase(askProductQuestion.rejected, (state) => {
         state.loading = false;
-        state.messages.push({ role: "assistant", message: action.payload });
-      })
-      .addCase(askProductQuestion.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
+        // state.productQuestion.error = action.payload as string;
       });
   },
 });
-
-export const { resetChat } = aiChatBotSlice.actions;
 
 // Export the reducer
 export default aiChatBotSlice.reducer;

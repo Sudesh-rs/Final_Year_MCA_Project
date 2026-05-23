@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../Redux Toolkit/Store";
-import { askProductQuestion, resetChat } from "../../../Redux Toolkit/Customer/AiChatBotSlice";
+import { askProductQuestion} from "../../../Redux Toolkit/Customer/AiChatBotSlice";
 import { Button, IconButton } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import PromptMessage from "./PromptMessage";
@@ -9,7 +9,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 interface ChatBotProps{
     handleClose:(e:any)=>void;
-    productId?: string;
+    productId?:number
 }
 
 const ChatBot = ({handleClose,productId}:ChatBotProps) => {
@@ -19,20 +19,20 @@ const ChatBot = ({handleClose,productId}:ChatBotProps) => {
   
     const {aiChatBot}=useAppSelector(store=>store);
 
-    useEffect(() => {
-        dispatch(resetChat());
-    }, [dispatch, productId]);
+    console.log("ai chat Bot",aiChatBot)
 
     const handleGivePrompt = (e:any) => {
-        e.stopPropagation();
-        if (!prompt.trim()) return;
+        e.stopPropagation()
+        // dispatch(chatBot({ prompt: { prompt }, productId, userId: null }));
 
         dispatch(askProductQuestion({
             productId,
-            question: prompt,
-        }));
+            question:prompt
+        }))
 
-        setPrompt("");
+        setPrompt("")
+
+        console.log("prompt ", productId, prompt)
     };
 
     const handlePromptChange = (e: any) => {
@@ -91,11 +91,6 @@ const ChatBot = ({handleClose,productId}:ChatBotProps) => {
                         )
                     )}
                     {aiChatBot.loading && <p>fetching data...</p>}
-                    {aiChatBot.error && (
-                        <div className="mt-4 rounded-md bg-red-100 px-4 py-3 text-sm text-red-700">
-                            {aiChatBot.error}
-                        </div>
-                    )}
 
                 </div>
 
