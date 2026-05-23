@@ -1,28 +1,16 @@
-import { useState } from 'react'
 import HomeCategory from './HomeCategory/HomeCategory'
 import TopBrand from './TopBrands/Grid'
 import ElectronicCategory from './Electronic Category/ElectronicCategory'
-import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 import { Backdrop, Button, CircularProgress } from '@mui/material'
-import ChatBot from '../ChatBot/ChatBot'
 import { useNavigate } from 'react-router-dom'
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import { useAppSelector } from '../../../Redux Toolkit/Store'
 import DealSlider from './Deals/DealSlider'
 
-
-
 const Home = () => {
-    const [showChatBot, setShowChatBot] = useState(false)
     const { homePage } = useAppSelector(store => store)
     const navigate = useNavigate();
 
-    const handleShowChatBot = () => {
-        setShowChatBot(!showChatBot)
-    }
-    const handleCloseChatBot = () => {
-        setShowChatBot(false)
-    }
     const becomeSellerClick = () => {
         navigate("/become-seller")
     }
@@ -66,18 +54,6 @@ const Home = () => {
                     </div>
 
                 </section>
-
-                <section className='fixed bottom-10 right-10'>
-                    {showChatBot ? <ChatBot handleClose={handleCloseChatBot} /> : <Button onClick={handleShowChatBot} sx={{ borderRadius: "2rem" }} variant='contained' className='h-16 w-16  flex justify-center items-center rounded-full'>
-                        <ChatBubbleIcon sx={{ color: "white", fontSize: "2rem" }} />
-                    </Button>}
-
-
-
-
-                </section>
-
-
 
             </div> : <Backdrop
                 open={true}

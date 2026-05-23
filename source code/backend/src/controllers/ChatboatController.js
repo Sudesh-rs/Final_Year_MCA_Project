@@ -6,19 +6,13 @@ class ChatboatController {
   async simpleChat(req, res) {
     try {
       const message = req.body.message;
+      const context = req.body.context || "";
 
       if (!message) {
         return res.status(400).json({ message: "Message is required" });
       }
 
-      const contents = [
-        {
-          role: "user",
-          parts: [{ text: message }],
-        },
-      ];
-
-      const data = await ChatbotService.chatService(contents);
+      const data = await ChatbotService.chatService(message, context);
       return res.status(200).json({ answer: data });
 
     } catch (error) {

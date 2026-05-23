@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../Redux Toolkit/Store";
-import { askProductQuestion} from "../../../Redux Toolkit/Customer/AiChatBotSlice";
+import {
+  askProductQuestion,
+  resetChatState,
+} from "../../../Redux Toolkit/Customer/AiChatBotSlice";
 import { Button, IconButton } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import PromptMessage from "./PromptMessage";
@@ -9,7 +12,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 interface ChatBotProps{
     handleClose:(e:any)=>void;
-    productId?:number
+    productId:string | number
 }
 
 const ChatBot = ({handleClose,productId}:ChatBotProps) => {
@@ -19,66 +22,73 @@ const ChatBot = ({handleClose,productId}:ChatBotProps) => {
   
     const {aiChatBot}=useAppSelector(store=>store);
 
-    console.log("ai chat Bot",aiChatBot)
-
     const handleGivePrompt = (e:any) => {
-        e.stopPropagation()
-        // dispatch(chatBot({ prompt: { prompt }, productId, userId: null }));
+        e.stopPropagation();
+        if (!prompt.trim()) return;
 
-        dispatch(askProductQuestion({
-            productId,
-            question:prompt
-        }))
+        dispatch(
+            askProductQuestion({
+                productId,
+                question: prompt,
+            })
+        );
 
-        setPrompt("")
-
-        console.log("prompt ", productId, prompt)
+        setPrompt("");
     };
 
     const handlePromptChange = (e: any) => {
-        
         setPrompt(e.target.value);
     };
+
     useEffect(() => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [aiChatBot.messages]);
-    // console.log(aiChatBot)
+
+    useEffect(() => {
+        dispatch(resetChatState());
+    }, [dispatch, productId]);
+
     return (
         <div className="rounded-lg">
             <div className="w-full lg:w-[40vw] h-[82vh] shadow-2xl bg-white z-50 rounded-lg">
                 <div className=" h-[12%] flex justify-between items-center px-5 bg-slate-100 rounded-t-lg">
                     <div className="flex items-center gap-3 ">
                         <h1 className="logo">IntelliMart</h1>
-                        <p>Assitant</p>
+                        <div>
+                            <p className="font-semibold">AI Assistant</p>
+                            <p className="text-xs text-slate-600">
+                                {`📦 Product Query (ID: ${productId})`}
+                            </p>
+                        </div>
                     </div>
-                   {/* {productId && <div className="flex items-center gap-3">
-                        <p>Product id :</p>
-                        <p>{productId}</p>
-                    </div>} */}
                     <div>
                         <IconButton 
                         onClick={handleClose}
                         color="primary"
-                       
                         >
                             <CloseIcon/>
                         </IconButton>
                     </div>
-
                 </div>
 
                 <div className="h-[78%] p-5 flex flex-col py-5 px-5 overflow-y-auto  custom-scrollbar">
 
-                    <p>welcome to IntelliMart Ai Assistant, you can
-                      {productId?` Query About this Product : ${productId}`:"   Query about your cart, and order history here"}
-                    </p>
+                    <div className="mb-4 pb-4 border-b border-slate-200">
+                        <p className="text-sm text-slate-700 font-medium mb-2">
+                            📦 Product Assistant
+                        </p>
+                        <p className="text-sm text-slate-600">
+                            Ask questions about this product for detailed information.
+                        </p>
+                    </div>
+
                     { aiChatBot.messages.map((item:any, index:number) =>
                         item.role == "user" ? (
                             <div ref={chatContainerRef} className="self-end" key={index}>
                                 <PromptMessage message={item.message} index={index} />
-                               {aiChatBot.loading && <h1 className=" font-bold">Thinking ...</h1>}
+                                {aiChatBot.loading && <h1 className=" font-bold">Thinking ...</h1>}
                             </div>
                         ) : (
                             <div
@@ -91,6 +101,11 @@ const ChatBot = ({handleClose,productId}:ChatBotProps) => {
                         )
                     )}
                     {aiChatBot.loading && <p>fetching data...</p>}
+                    {aiChatBot.error && (
+                        <div className="text-sm text-red-600 mt-2">
+                            {aiChatBot.error}
+                        </div>
+                    )}
 
                 </div>
 

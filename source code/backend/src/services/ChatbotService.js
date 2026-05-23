@@ -1,21 +1,71 @@
 require("dotenv").config();
 const fs = require("fs");
+const path = require("path");
 const ProductService = require("./ProductService");
+const DEFAULT_MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
 
 class ChatboatService {
-  // The client gets the API key from the environment variable `GEMINI_API_KEY`.
+  // Path to project data file
+  getProjectDataPath() {
+    return path.join(__dirname, "../../PROJECT_DATA.txt");
+  }
 
-  async chatService(contents) {
-    const { GoogleGenAI } = await import("@google/genai");
+  // Read project data from file
+  readProjectData() {
+    try {
+      const filePath = this.getProjectDataPath();
+      if (fs.existsSync(filePath)) {
+        return fs.readFileSync(filePath, "utf-8");
+      }
+      return "Project data file not found. Please add content to PROJECT_DATA.txt";
+    } catch (error) {
+      console.error("Error reading project data:", error);
+      return "Unable to read project data.";
+    }
+  }
 
-    const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
+  // Global chat - reads from PROJECT_DATA.txt file
+  async chatService(message, context = "") {
+    try {
+      // Try to read from project data file first
+      const projectData = this.readProjectData();
+      
+      // If custom context is provided, use that. Otherwise use project data.
+      const effectiveContext = context || projectData;
+      
+      const prompt = `You are a helpful project assistant. Use the following project information to answer questions accurately and professionally.
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents,
-    });
-    console.log(response.text);
-    return response.text;
+--- PROJECT INFORMATION ---
+${effectiveContext}
+-----------------------
+
+Question: ${message}
+
+Answer: (Be concise, helpful, and relevant to the project)`;
+
+      console.log("Global Chat - Using context from:", context ? "User input" : "PROJECT_DATA.txt");
+
+      const { GoogleGenAI } = await import("@google/genai");
+      const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
+
+      const contents = [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+      ];
+
+      const response = await ai.models.generateContent({
+        model: DEFAULT_MODEL,
+        contents,
+      });
+
+      console.log("Global Chat Response:", response.text);
+      return response.text;
+    } catch (error) {
+      console.error("Chat Service Error:", error);
+      throw new Error("Failed to process your question: " + error.message);
+    }
   }
 
   async askProductQuestion(productId, userQuestion) {
@@ -33,7 +83,7 @@ class ChatboatService {
         ];
 
         const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
+          model: DEFAULT_MODEL,
           contents,
         });
 

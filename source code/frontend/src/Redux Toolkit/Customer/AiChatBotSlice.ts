@@ -19,21 +19,25 @@ const initialState: AiChatBotState = {
 // Define the async thunk for sending the message to the chatbot
 export const chatBot = createAsyncThunk<
   any,
-  { prompt: any; productId: number | null | undefined; userId: number | null }
+  { message: string; productId?: number | null; userId?: number | null; context?: string | null }
 >(
   "aiChatBot/generateResponse",
-  async ({ prompt, productId, userId }, { rejectWithValue }) => {
+  async ({ message, productId, userId, context }, { rejectWithValue }) => {
     try {
-      const response = await api.post("/chat", prompt, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
-        params: {
-          userId,
-          productId,
-        },
-      });
+      const response = await api.post(
+        "/chat",
+        { message, context },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          },
+          params: {
+            userId,
+            productId,
+          },
+        }
+      );
       console.log("response ", productId, response.data);
       return response.data;
     } catch (error: any) {
@@ -73,49 +77,66 @@ export const askProductQuestion = createAsyncThunk<
 const aiChatBotSlice = createSlice({
   name: "aiChatBot",
   initialState,
-  reducers: {},
+  reducers: {
+    resetChatState(state) {
+      state.response = null;
+      state.loading = false;
+      state.error = null;
+      state.messages = [];
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(chatBot.pending, (state, action) => {
         state.loading = true;
         state.error = null;
-        const { prompt } = action.meta.arg;
+        const { message } = action.meta.arg;
 
-        // You can log or use the data here
-        // console.log('Pending request:', { prompt, productId, userId });
-        const userPrompt = { message: prompt.prompt, role: "user" };
+        const userPrompt = { message, role: "user" };
         state.messages = [...state.messages, userPrompt];
       })
       .addCase(chatBot.fulfilled, (state, action) => {
         state.loading = false;
-        state.response = action.payload;
-        state.messages = [...state.messages, action.payload];
+        state.response = action.payload?.answer ?? null;
+        state.messages = [
+          ...state.messages,
+          { role: "res", message: action.payload?.answer ?? action.payload },
+        ];
       })
       .addCase(chatBot.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+        state.messages.push({
+          role: "res",
+          message: action.payload as string || "Failed to generate chatbot response",
+        });
       })
       .addCase(askProductQuestion.pending, (state,action) => {
         state.loading = true;
-        // state.productQuestion.error = null;
-        // state.productQuestion.answer = null;
+        state.error = null;
         state.messages.push({role:"user",message:action.meta.arg.question})
       })
       .addCase(
         askProductQuestion.fulfilled,
         (state, action) => {
           state.loading = false;
-          // state.productQuestion.answer = action.payload;
+          state.error = null;
           console.log("ans - ", action.payload)
           state.messages.push({role:'res',message:action.payload})
         }
       )
-      .addCase(askProductQuestion.rejected, (state) => {
+      .addCase(askProductQuestion.rejected, (state, action) => {
         state.loading = false;
-        // state.productQuestion.error = action.payload as string;
+        state.error = action.payload as string;
+        state.messages.push({
+          role: "res",
+          message: action.payload as string || "Failed to get answer",
+        });
       });
   },
 });
+
+export const { resetChatState } = aiChatBotSlice.actions;
 
 // Export the reducer
 export default aiChatBotSlice.reducer;
